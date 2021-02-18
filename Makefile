@@ -1,5 +1,5 @@
 all: escalona.c 
-	gcc -o escalona escalona.c grafo.c
+	gcc -g -o escalona escalona.c grafo.c linkedlist.c
 
 clean: 
 	$(RM) escalona
