@@ -27,7 +27,12 @@ void display(List * list) {
     return;
   
   for(; current != NULL; current = current->next) {
-    printf("%d\n", current->data);
+    
+    if(current->next == NULL) {
+      printf("%d ", current->data);
+    } else {
+      printf("%d,", current->data);
+    }
   }
 }
 

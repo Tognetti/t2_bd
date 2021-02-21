@@ -5,4 +5,8 @@ typedef struct transacao {
     char atributo;
 } Transacao;
 
-int leTransacoes(Transacao *transacoes);
+typedef struct escalonamento {
+    Transacao* transacoes;
+    int size;
+    int n_ids;
+} Escalonamento;

@@ -31,17 +31,29 @@ Graph* createGraph(int V) {
 
 // Adds an edge to graph
 void addEdge(Graph* graph, int src, int dest) {
-    // Add an edge from src to dest.  A new node is added to the adjacency
-    // list of src.  The node is added at the begining
-    AdjListNode* newNode = newAdjListNode(dest);
-    newNode->next = graph->array[src].head;
-    graph->array[src].head = newNode;
+    // Add an edge from src to dest. A new node is added to the adjacency list of src. The node is added at the begining
+    if(findEdge(graph, src, dest) == 0) { // Verifica se aresta já existe
+        AdjListNode* newNode = newAdjListNode(dest);
+        newNode->next = graph->array[src].head;
+        graph->array[src].head = newNode;
+    }   
+}
+
+int findEdge(Graph* graph, int src, int dest) {
+    for (int v = 0; v < graph->V; v++) {
+        AdjListNode* pCrawl = graph->array[v].head;
+        while (pCrawl) {
+            if(graph->array[v].valor == src && pCrawl->valor == dest) {
+                return 1;
+            }
+            pCrawl = pCrawl->next;
+        }
+    }
+    return 0;
 }
 
 void printGraph(Graph* graph) {
-    int v;
-
-    for (v = 0; v < graph->V; v++) {
+    for (int v = 0; v < graph->V; v++) {
         AdjListNode* pCrawl = graph->array[v].head;
         printf("\n Adjacency list of vertex %d\n head ", graph->array[v].valor);
         while (pCrawl) {
@@ -52,14 +64,26 @@ void printGraph(Graph* graph) {
     }
 }
 
+void destroyGraph(Graph* graph) {
+    for (int v = 0; v < graph->V; v++) {
+        AdjListNode* pCrawl = graph->array[v].head;
+        AdjListNode* next = pCrawl;
+        while (pCrawl) {
+            next = pCrawl->next;
+            free(pCrawl);
+            pCrawl = next;
+        }
+    }
+    free(graph->array);
+    free(graph);
+}
+
 int contemCiclo(Graph* graph) {
     int max = graph->V;
     int contem = 0;
 
     for (int v = 0; v < graph->V; v++) {
         if(contem == 0) {
-            printf("Chamando DFS começando pelo nodo %d\n", graph->array[v].valor);
-
             int* visitados = (int*) malloc(sizeof(int) * max);
             int visitados_n = 0;
 
