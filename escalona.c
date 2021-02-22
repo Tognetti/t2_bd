@@ -101,7 +101,7 @@ int main() {
     // Verifica se escalonamento é serial e imprime os resultados
     // O escalonamento é serial se seu grafo correspondente não contém ciclos
     // ***
-    for(int i = 0; i < grafos_n; i++) {
+    for(int i = 0; i < escal_n; i++) {
         printf("%d ", i+1);
         List* lista_ids = makelist();
 
@@ -113,8 +113,47 @@ int main() {
         display(lista_ids);
         if(contemCiclo(grafos[i]) == 1) {
             printf("NS ");
+            // Se não existir blind write, então escalonamento também não vai ser equivalente por visão
+            int aux = 0; // Assumo que não existem blind writes no escalonamento
+
+            for(int j = 0; j < escalonamentos[i].size && aux == 0; j++) {
+                Transacao t1 = escalonamentos[i].transacoes[j];
+                if(t1.operacao == 'W') {
+                    int blind_write = 1;
+                    for(int k = 0; k < j; k++) {
+                        Transacao t2 = escalonamentos[i].transacoes[k];
+                        if((t1.id == t2.id) && (t2.operacao == 'R') && (t1.atributo == t2.atributo)) {
+                            blind_write = 0;
+                        }
+                    }
+                    if(blind_write == 1) {
+                        // Como existe um blind write, ainda devo verificar
+                        aux = 1;
+                        printf("Existe blind write, ainda devo verificar\n");
+                        
+                        // Gero todos os escalonamentos seriais possíveis com base no escalonamento original
+                        int permutacoes_esc_n;
+                        Escalonamento* permutacoes_esc = geraPermutacoes(escalonamentos[i], &permutacoes_esc_n);
+
+                        for(int i = 0; i < permutacoes_esc_n; i++) {
+                            Escalonamento esc = permutacoes_esc[i];
+                            printf("Escalonamento %d\n", i);
+                            for(int j = 0; j < esc.size; j++) {
+                                printf("%d %d %c %c\n", esc.transacoes[j].tempo, esc.transacoes[j].id, esc.transacoes[j].operacao, esc.transacoes[j].atributo);
+                            }
+                            printf("\n");
+                        }                   
+                    }
+                }
+            }
+            
+            if(aux == 0) {
+                //Não contém blind write
+                printf("NV");
+            }
+
         } else {
-            printf("SS ");
+            printf("SS SV"); // Todo escalonamento serial por conflito também é equivalente por visão
         }
         printf("\n");
         destroy(lista_ids);

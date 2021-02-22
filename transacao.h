@@ -10,3 +10,5 @@ typedef struct escalonamento {
     int size;
     int n_ids;
 } Escalonamento;
+
+Escalonamento* geraPermutacoes(Escalonamento e, int* tamanho);
