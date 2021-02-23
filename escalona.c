@@ -130,19 +130,13 @@ int main() {
                         // Como existe um blind write, ainda devo verificar
                         aux = 1;
                         printf("Existe blind write, ainda devo verificar\n");
-                        
+
                         // Gero todos os escalonamentos seriais possíveis com base no escalonamento original
                         int permutacoes_esc_n;
                         Escalonamento* permutacoes_esc = geraPermutacoes(escalonamentos[i], &permutacoes_esc_n);
 
-                        for(int i = 0; i < permutacoes_esc_n; i++) {
-                            Escalonamento esc = permutacoes_esc[i];
-                            printf("Escalonamento %d\n", i);
-                            for(int j = 0; j < esc.size; j++) {
-                                printf("%d %d %c %c\n", esc.transacoes[j].tempo, esc.transacoes[j].id, esc.transacoes[j].operacao, esc.transacoes[j].atributo);
-                            }
-                            printf("\n");
-                        }                   
+                        // TODO: Preciso comparar o escalonamento original com todos os que gerei, verificando condições
+                        int visao_equivalente = verificaVisaoEquivalente(escalonamentos[i], permutacoes_esc, permutacoes_esc_n);                 
                     }
                 }
             }

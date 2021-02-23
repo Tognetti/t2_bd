@@ -12,3 +12,5 @@ typedef struct escalonamento {
 } Escalonamento;
 
 Escalonamento* geraPermutacoes(Escalonamento e, int* tamanho);
+
+int verificaVisaoEquivalente(Escalonamento e, Escalonamento* permutacoes, int permutacoes_n);
