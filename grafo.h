@@ -25,12 +25,10 @@ AdjListNode* newAdjListNode(int dest);
 // Cria um grafo com V vértices
 Graph* createGraph(int V);
 
-// Adiciona aresta ao grafo
 void addEdge(Graph* graph, int src, int dest);
 
 int findEdge(Graph* graph, int src, int dest);
 
-// Imprime grafo
 void printGraph(Graph* graph);
 
 void destroyGraph(Graph* graph);

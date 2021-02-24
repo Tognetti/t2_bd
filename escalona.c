@@ -75,6 +75,7 @@ int main() {
         grafos[i] = createGraph(escalonamentos[i].n_ids);
     }
 
+    // Cria as arestas do grafo de acordo com operações
     for(int i = 0; i < grafos_n; i++) {
         for(int j = 0; j < escalonamentos[i].size; j++) {
             Transacao t1 = escalonamentos[i].transacoes[j];
@@ -97,24 +98,23 @@ int main() {
         }
     }
 
-    // ***
-    // Verifica se escalonamento é serial e imprime os resultados
-    // O escalonamento é serial se seu grafo correspondente não contém ciclos
-    // ***
+    // Verifica se escalonamento é serial, ou seja, se seu grafo correspondente não contém ciclos
     for(int i = 0; i < escal_n; i++) {
         printf("%d ", i+1);
         List* lista_ids = makelist();
 
+        // Imprime os ids das transações do escalonamento
         for(int j = 0; j < escalonamentos[i].size; j++) {
             if(find(escalonamentos[i].transacoes[j].id, lista_ids) == 0) {
                 add(escalonamentos[i].transacoes[j].id, lista_ids);
             }
         }
         display(lista_ids);
+
         if(contemCiclo(grafos[i]) == 1) {
             printf("NS ");
             // Se não existir blind write, então escalonamento também não vai ser equivalente por visão
-            int aux = 0; // Assumo que não existem blind writes no escalonamento
+            int aux = 0;
 
             for(int j = 0; j < escalonamentos[i].size && aux == 0; j++) {
                 Transacao t1 = escalonamentos[i].transacoes[j];
@@ -127,16 +127,18 @@ int main() {
                         }
                     }
                     if(blind_write == 1) {
-                        // Como existe um blind write, ainda devo verificar
+                        // Como existe um blind write, ainda devo verificar condições da visão equivalente
                         aux = 1;
-                        printf("Existe blind write, ainda devo verificar\n");
 
                         // Gero todos os escalonamentos seriais possíveis com base no escalonamento original
                         int permutacoes_esc_n;
                         Escalonamento* permutacoes_esc = geraPermutacoes(escalonamentos[i], &permutacoes_esc_n);
 
-                        // TODO: Preciso comparar o escalonamento original com todos os que gerei, verificando condições
-                        int visao_equivalente = verificaVisaoEquivalente(escalonamentos[i], permutacoes_esc, permutacoes_esc_n);                 
+                        if(verificaVisaoEquivalente(escalonamentos[i], permutacoes_esc, permutacoes_esc_n)) {
+                            printf("SV");
+                        } else {
+                            printf("NV");
+                        }             
                     }
                 }
             }

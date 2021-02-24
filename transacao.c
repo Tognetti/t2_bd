@@ -10,18 +10,9 @@ void swap(int *a, int *b) {
     *b = temp;
 }
 
-void printarray(int arr[], int size)
-{
-    int i,j;
-    for(i=0; i<size; i++)
-    {
-        printf("%d\t",arr[i]);
-    }
-    printf("\n");
-}
-
+// Recebe um array de int (arr) e retorna todas as permutações possíveis no array permutacoes
 void permutaIds(int* arr, int start, int end, int** permutacoes, int n, int* m) {
-    if(start==end) {
+    if(start == end) {
         permutacoes[*m] = (int*) malloc(sizeof(int) * n);
         for(int i = 0; i < n; i++) {
             permutacoes[*m][i] = arr[i];
@@ -38,6 +29,7 @@ void permutaIds(int* arr, int start, int end, int** permutacoes, int n, int* m) 
     }
 }
 
+// Recebe um escalonamento e retorna as permutações possíveis de escalonamentos seriais
 Escalonamento* geraPermutacoes(Escalonamento e, int* tamanho) {
 
     // Armazena os ids das transações em um array
@@ -64,6 +56,7 @@ Escalonamento* geraPermutacoes(Escalonamento e, int* tamanho) {
       fat = fat * n;
     }
 
+    // Calcula o número de permutações possíveis
     int permutacoes_n = fat;
     int** permutacoes = (int **) malloc(sizeof(int*) * permutacoes_n);
     int m = 0;
@@ -98,6 +91,7 @@ Escalonamento* geraPermutacoes(Escalonamento e, int* tamanho) {
     return escalonamentos;
 }
 
+// Retorna as últimas transações que fazem operação de W em cada atributo
 Transacao* encontraFinalWrites(Escalonamento e, int* n) {
     Transacao* final_writes = (Transacao*) malloc(sizeof(Transacao) * e.size);
     int final_writes_n = 0;
@@ -112,7 +106,7 @@ Transacao* encontraFinalWrites(Escalonamento e, int* n) {
                 }
             }
             if(aux == 0) {
-                // Ainda não achei um final write para esse atributo, então adiciono no array
+                // Ainda não tenho um final write para esse atributo, então adiciono no array
                 final_writes[final_writes_n] = t;
                 final_writes_n++;
             }
@@ -123,26 +117,62 @@ Transacao* encontraFinalWrites(Escalonamento e, int* n) {
     return final_writes;
 }
 
-int verificaVisaoEquivalente(Escalonamento e, Escalonamento* permutacoes, int permutacoes_n) {
+// Verifica a seguinte condição entre dois escalonamentos:
+// Para cada r(x) de Ti, se o valor de x lido for escrito por w(x) de Tj, o mesmo deve permanecer para r(x) de Ti em S'
+int verificaWriteBeforeReadIguais(Escalonamento e_permutacao, Escalonamento e_original) {
 
-    printf("Escalonamento original\n");
+    // Encontra cada operação de R na permutação e o respectivo W que escreveu o atributo
+    for(int j = 0; j < e_permutacao.size; j++) {
+        Transacao t_r = e_permutacao.transacoes[j];
+        Transacao t_w;
+        
+        if(t_r.operacao == 'R') {
+            int found = 0;
+            for(int k = j-1; k >= 0 && found == 0; k--) {
+                t_w = e_permutacao.transacoes[k];
+                if(t_w.operacao == 'W' && (t_r.atributo == t_w.atributo)) {
+                    found = 1;
+                }
+            }
+
+            // Compara se no escalonamento original o W que escreveu para o R é o mesmo
+            for(int k = 0; k < e_original.size; k++) {
+                Transacao t_r_original = e_original.transacoes[k];
+                if((t_r_original.operacao == 'R') && (t_r_original.atributo == t_r.atributo) && (t_r_original.id == t_r.id)) {
+                    int found2 = 0;
+                    for(int l = k-1; l >= 0 && found2 == 0; l--) {
+                        Transacao t_w_original = e_original.transacoes[l];
+                        if((t_w_original.operacao == 'W') && (t_w_original.atributo == t_r_original.atributo) && (t_w_original.id == t_w.id)) {
+                            found2 = 1;
+                        }                               
+                    }
+
+                    if(found2 == 0 && found == 1) {
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+}
+
+int verificaVisaoEquivalente(Escalonamento e, Escalonamento* permutacoes, int permutacoes_n) {
 
     // Encontra as últimas operações de escrita em cada atributo do escalonamento original
     int final_writes_n;
     Transacao* final_writes = encontraFinalWrites(e, &final_writes_n);
 
-    for(int i = 0; i < final_writes_n; i++) {
-        printf("%d %d %c %c\n", final_writes[i].tempo, final_writes[i].id, final_writes[i].operacao, final_writes[i].atributo);
-    }
-
     for(int i = 0; i < permutacoes_n; i++) {
         Escalonamento esc = permutacoes[i];
+        int equivalente = 0;
 
+        
+        // Verifica condição:
+        // Se o operador w(y) em Tk é a ultima escrita de y em S, então w(y) em Tk deve ser a última escrita em S' 
         Transacao* final_writes_permutacao = encontraFinalWrites(esc, &final_writes_n);
         int aux = 0;
-        printf("Final writes do escalonamento %d\n", i);
         for(int j = 0; j < final_writes_n && aux == 0; j++) {
-            printf("%d %d %c %c\n", final_writes_permutacao[j].tempo, final_writes_permutacao[j].id, final_writes_permutacao[j].operacao, final_writes_permutacao[j].atributo);
             for(int k = 0; k < final_writes_n; k++) {
                 if(final_writes_permutacao[j].atributo == final_writes[k].atributo) {
                     if(final_writes_permutacao[j].id != final_writes[k].id) {
@@ -152,20 +182,9 @@ int verificaVisaoEquivalente(Escalonamento e, Escalonamento* permutacoes, int pe
             }
         }
         if(aux == 0) {
-            printf("Permutação tem os final writes iguais\n");
-        } else {
-            printf("Permutação não tem os final writes iguais\n");
+            return verificaWriteBeforeReadIguais(esc, e);
         }
     }
-
-
-    // for(int i = 0; i < permutacoes_n; i++) {
-    //     Escalonamento esc = permutacoes[i];
-    //     printf("Escalonamento %d\n", i);
-    //     for(int j = 0; j < esc.size; j++) {
-    //         printf("%d %d %c %c\n", esc.transacoes[j].tempo, esc.transacoes[j].id, esc.transacoes[j].operacao, esc.transacoes[j].atributo);
-    //     }
-    //     printf("\n");
-    // }  
+    return 0;
 }
 
