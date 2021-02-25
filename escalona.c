@@ -3,6 +3,7 @@
 
 #include "grafo.h"
 #include "transacao.h"
+#include "linkedlist.h"
 
 int main() {
 
